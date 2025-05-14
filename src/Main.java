@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    public static final String file = "C://Users//pc//Downloads//Directory/Compilers.txt";
+    private static final String file = "C://Users//pc//Downloads//Directory/Compilers.txt";
 
     private static final Map<String, String> keywords = new HashMap<>();
 
@@ -33,19 +33,25 @@ public class Main {
     private static final Map<String, String> sentences = new HashMap<>();
 
     static {
-        sentences.put("Start Statement", "Program");
-        sentences.put("Class Identifier OpenBrace", "ClassDeclaration");
-        sentences.put("Integer Identifier AssignmentOperator Constant Semicolon", "VarDeclaration");
+        sentences.put("Start Statement", "Program"); //Program
+        sentences.put("Class Identifier OpenBrace", "ClassDeclaration");// className x {
+        sentences.put("Integer Identifier AssignmentOperator Constant Semicolon", "VarDeclaration");//int x = 3;
+        sentences.put("Loop OpenParen Identifier RelationalOperator Identifier Semicolon Identifier Semicolon Constant CloseParen OpenBrace", "ContinueWhenStatement");//for (i < x; x; 5){
 
     }
 
     public static void main(String[] args) throws IOException {
         List<Token> tokens = new ArrayList<>();
+        List<List<String>> allTokenTypesPerLine = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new FileReader(file));
+
         String line;
         int lineCount = 1, tokenErrorCount = 0, grammarErrorCount = 0;
 
+        // Tokenization: Lexical Analysis
         while ((line = reader.readLine()) != null) {
+            lines.add(line);
             String[] words = line.trim().split("\\s+|(?=[{}();=,+\\-*/])|(?<=[{}();=,+\\-*/])");
             List<String> tokenTypesForLine = new ArrayList<>();
 
@@ -56,6 +62,7 @@ public class Main {
                 } else {
                     type = identifyToken(word);
                 }
+
                 if (type.equals("Unknown")) {
                     System.out.println("Line: " + lineCount + " Error in Token text: " + word);
                     tokenErrorCount++;
@@ -65,30 +72,37 @@ public class Main {
                 }
             }
 
-            if (!tokenTypesForLine.isEmpty()) {
-                String sentenceKey = String.join(" ", tokenTypesForLine);
-                System.out.println("Line " + lineCount + ": Sentence Analysis: " + sentenceKey);
+            allTokenTypesPerLine.add(tokenTypesForLine);
+            lineCount++;
+        }
+
+        // Print all tokens using toString method(override)
+        for (Token token : tokens) {
+            System.out.println(token);
+        }
+
+        // Parser: Grammar Analysis
+        for (int i = 0; i < allTokenTypesPerLine.size(); i++) {
+            List<String> tokenTypes = allTokenTypesPerLine.get(i);
+            if (!tokenTypes.isEmpty()) {
+                String sentenceKey = String.join(" ", tokenTypes);
+                System.out.println("Line " + (i + 1) + ": Sentence Analysis: " + sentenceKey);
 
                 if (sentences.containsKey(sentenceKey)) {
                     System.out.println("Grammar Match: " + sentences.get(sentenceKey));
                 } else {
                     System.out.println("Grammar Match: [No matching rule found]");
                     grammarErrorCount++;
-
                 }
             }
-            lineCount++;
         }
 
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
-
+        //print final error counts
         System.out.println("Total number of token errors: " + tokenErrorCount);
         System.out.println("Total number of grammar errors: " + grammarErrorCount);
-
     }
 
+    //use the hashmap and then the other stuff, if it doesn't match then unknown
     private static String identifyToken(String word) {
         if (keywords.containsKey(word)) {
             return keywords.get(word);
