@@ -28,6 +28,8 @@ public class Main {
         keywords.put("situationof", "Switch");
         keywords.put("Using", "Inclusion");
         keywords.put("End", "End Statement");
+        keywords.put("read", "Read");
+        keywords.put("write", "Write");
     }
 
     private static final Map<String, String> sentences = new HashMap<>();
@@ -37,7 +39,14 @@ public class Main {
         sentences.put("Class Identifier OpenBrace", "ClassDeclaration");// className x {
         sentences.put("Integer Identifier AssignmentOperator Constant Semicolon", "VarDeclaration");//int x = 3;
         sentences.put("Loop OpenParen Identifier RelationalOperator Identifier Semicolon Identifier Semicolon Constant CloseParen OpenBrace", "ContinueWhenStatement");//for (i < x; x; 5){
-
+        sentences.put("Method Identifier OpenParen CloseParen OpenBrace", "MethodDeclaration");
+        sentences.put("Identifier AssignmentOperator Identifier AddOp Constant Semicolon", "VariableDecrement");
+        sentences.put("CloseBrace", "CloseBlock"); // }
+        sentences.put("End Statement", "ProgramEnd"); // End
+        sentences.put("RotateWhen OpenParen Identifier RelationalOperator AssignmentOperator Identifier Semicolon Identifier Semicolon Constant CloseParen OpenBrace","RotateLoop");
+        sentences.put("Identifier AssignmentOperator Identifier Semicolon","FLAG");
+        sentences.put("Boolean Identifier AssignmentOperator Identifier Semicolon","Bool");
+        sentences.put("WhetherDo OpenParen Identifier CloseParen OpenBrace","IfFlag");
     }
 
     public static void main(String[] args) throws IOException {
@@ -53,7 +62,7 @@ public class Main {
         while ((line = reader.readLine()) != null) {
             lines.add(line);
             String[] words = line.trim().split("\\s+|(?=[{}();=,+\\-*/])|(?<=[{}();=,+\\-*/])");
-            List<String> tokenTypesForLine = new ArrayList<>();
+            List<String> tokensForParsing = new ArrayList<>();
 
             for (String word : words) {
                 String type;
@@ -68,11 +77,11 @@ public class Main {
                     tokenErrorCount++;
                 } else {
                     tokens.add(new Token(lineCount, word, type));
-                    tokenTypesForLine.add(type);
+                    tokensForParsing.add(type);
                 }
             }
 
-            allTokenTypesPerLine.add(tokenTypesForLine);
+            allTokenTypesPerLine.add(tokensForParsing);
             lineCount++;
         }
 
